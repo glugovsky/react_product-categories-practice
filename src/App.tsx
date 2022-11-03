@@ -8,14 +8,14 @@ import categoriesFromServer from './api/categories';
 import { UserFilter } from './components/UserFilter';
 import { SearchBar } from './components/SearchBar';
 import { ProductsTable } from './components/ProductsTable';
+import { CategoriesFilter } from './components/CategoriesFilter';
+import { ResetButton } from './components/ResetButton';
 
 import {
   Category,
   User,
   ProductComplete,
 } from './react-app-env';
-import { CategoriesFilter } from './components/CategoriesFilter';
-import { ResetButton } from './components/ResetButton';
 
 function getCategoryById(categoryId: number): Category | null {
   const category = categoriesFromServer.find(currentCategory => (
@@ -52,6 +52,8 @@ export const App: React.FC = () => {
   const [query, setQuery] = useState('');
   const [currentUserId, setCurrentUserId] = useState<number>(0);
   const [currentCategoryIds, setCurrentCategoryIds] = useState<number[]>([]);
+  const [sortBy, setSortBy] = useState('');
+  const [isSortReversed, setIsSortReversed] = useState(false);
 
   const handleResetAll = () => {
     setCurrentUserId(0);
@@ -104,6 +106,33 @@ export const App: React.FC = () => {
     filterProducts();
   }, [query, currentUserId, currentCategoryIds]);
 
+  const sortProducts = () => {
+    const sortedProducts = [...products]
+      .sort((firstProduct, secondProduct) => {
+        switch (sortBy) {
+          case 'ID':
+            return firstProduct.id - secondProduct.id;
+
+          case 'Product':
+            return firstProduct.name.localeCompare(secondProduct.name);
+
+          case 'Category':
+            return firstProduct.categoryId - secondProduct.categoryId;
+
+          case 'User':
+            return (firstProduct.user?.name || '')
+              .localeCompare(secondProduct.user?.name || '');
+
+          default:
+            return 0;
+        }
+      });
+
+    return (isSortReversed)
+      ? sortedProducts.reverse()
+      : sortedProducts;
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -132,9 +161,16 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          {products.length > 0
-            ? <ProductsTable products={products} />
-            : (
+          {sortProducts().length > 0
+            ? (
+              <ProductsTable
+                products={sortProducts()}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                isSortReversed={isSortReversed}
+                setIsSortReversed={setIsSortReversed}
+              />
+            ) : (
               <p data-cy="NoMatchingMessage">
                 No products matching selected criteria
               </p>

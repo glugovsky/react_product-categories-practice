@@ -1,6 +1,6 @@
 /// <reference types="react-scripts" />
 
-export interface Product {
+interface Product {
   id: number;
   name: string;
   categoryId: number;

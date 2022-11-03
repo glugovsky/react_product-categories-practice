@@ -1,13 +1,41 @@
 import React from 'react';
 import cn from 'classnames';
 
-import { ProductComplete } from '../../react-app-env';
+import {
+  ProductComplete,
+} from '../../react-app-env';
 
 interface Props {
   products: ProductComplete[];
+  sortBy: string;
+  setSortBy: React.Dispatch<React.SetStateAction<string>>;
+  isSortReversed: boolean;
+  setIsSortReversed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ProductsTable: React.FC<Props> = ({ products }) => {
+const sortingOptions = ['ID', 'Product', 'Category', 'User'];
+
+export const ProductsTable: React.FC<Props> = ({
+  products,
+  sortBy,
+  setSortBy,
+  isSortReversed,
+  setIsSortReversed,
+}) => {
+  const handleSortingSelection = (sortingOption: string) => {
+    if (sortingOption === sortBy) {
+      if (isSortReversed) {
+        setIsSortReversed(false);
+        setSortBy('');
+      } else {
+        setIsSortReversed(true);
+      }
+    } else {
+      setSortBy(sortingOption);
+      setIsSortReversed(false);
+    }
+  };
+
   return (
     <table
       data-cy="ProductTable"
@@ -15,53 +43,31 @@ export const ProductsTable: React.FC<Props> = ({ products }) => {
     >
       <thead>
         <tr>
-          <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              ID
+          {sortingOptions.map(sortingOption => (
+            <th>
+              <span className="is-flex is-flex-wrap-nowrap">
+                {sortingOption}
 
-              <a href="#/">
-                <span className="icon">
-                  <i data-cy="SortIcon" className="fas fa-sort" />
-                </span>
-              </a>
-            </span>
-          </th>
-
-          <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              Product
-
-              <a href="#/">
-                <span className="icon">
-                  <i data-cy="SortIcon" className="fas fa-sort-down" />
-                </span>
-              </a>
-            </span>
-          </th>
-
-          <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              Category
-
-              <a href="#/">
-                <span className="icon">
-                  <i data-cy="SortIcon" className="fas fa-sort-up" />
-                </span>
-              </a>
-            </span>
-          </th>
-
-          <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              User
-
-              <a href="#/">
-                <span className="icon">
-                  <i data-cy="SortIcon" className="fas fa-sort" />
-                </span>
-              </a>
-            </span>
-          </th>
+                <a
+                  href="#/"
+                  onClick={() => handleSortingSelection(sortingOption)}
+                >
+                  <span className="icon">
+                    <i
+                      data-cy="SortIcon"
+                      className={cn('fas', {
+                        'fa-sort': sortingOption !== sortBy,
+                        'fa-sort-up': sortingOption === sortBy
+                          && !isSortReversed,
+                        'fa-sort-down': sortingOption === sortBy
+                          && isSortReversed,
+                      })}
+                    />
+                  </span>
+                </a>
+              </span>
+            </th>
+          ))}
         </tr>
       </thead>
 
